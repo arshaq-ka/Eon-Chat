@@ -2,4 +2,14 @@ langgraph
 langgraph-checkpoint-sqlite
 langchain-core
 langchain-ollama
+langchain-chroma
+langchain-text-splitters
 streamlit
+requests
+feedparser
+ddgs
+python-dotenv
+tzdata
+pytest
+pypdf
+python-docx

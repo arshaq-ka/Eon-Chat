@@ -1,1 +1,7 @@
 chat_history.sqlite*
+rag_index/
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
