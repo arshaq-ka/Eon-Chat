@@ -7,6 +7,7 @@ from tools import (
     get_current_datetime,
     get_current_news,
     get_weather,
+    purchase_stock,
     web_search,
 )
 
@@ -133,3 +134,51 @@ def test_web_search_returns_top_results(monkeypatch):
 
     assert "Python website" in result
     assert "https://python.org" in result
+
+
+def test_purchase_stock_submits_paper_market_order(monkeypatch):
+    purchase_stock_module = importlib.import_module("tools.purchase_stock")
+    monkeypatch.setenv("ALPACA_API_KEY", "paper-key")
+    monkeypatch.setenv("ALPACA_SECRET_KEY", "paper-secret")
+
+    class FakeOrderResponse:
+        ok = True
+
+        def json(self):
+            return {"id": "paper-order-id", "status": "accepted"}
+
+    def fake_post(url, *, headers, json, timeout):
+        assert url == purchase_stock_module.ALPACA_PAPER_ORDERS_URL
+        assert url.startswith("https://paper-api.")
+        assert headers == {
+            "APCA-API-KEY-ID": "paper-key",
+            "APCA-API-SECRET-KEY": "paper-secret",
+        }
+        assert json == {
+            "symbol": "AAPL",
+            "qty": 2,
+            "side": "buy",
+            "type": "market",
+            "time_in_force": "day",
+        }
+        assert timeout == 15
+        return FakeOrderResponse()
+
+    monkeypatch.setattr(purchase_stock_module.requests, "post", fake_post)
+
+    result = purchase_stock.invoke({"symbol": "aapl", "quantity": 2})
+
+    assert "paper market buy order submitted" in result
+    assert "paper-order-id" in result
+    assert "not a confirmation that the order has filled" in result
+
+
+def test_purchase_stock_requires_credentials_and_positive_quantity(monkeypatch):
+    monkeypatch.delenv("ALPACA_API_KEY", raising=False)
+    monkeypatch.delenv("ALPACA_SECRET_KEY", raising=False)
+
+    result = purchase_stock.invoke({"symbol": "AAPL", "quantity": 2})
+    assert "set ALPACA_API_KEY and ALPACA_SECRET_KEY" in result
+
+    result = purchase_stock.invoke({"symbol": "AAPL", "quantity": 0})
+    assert "quantity must be a positive whole number" in result

@@ -2,6 +2,7 @@ from tools.calculator import calculator
 from tools.current_datetime import get_current_datetime
 from tools.current_news import get_current_news
 from tools.document_search import search_uploaded_documents
+from tools.purchase_stock import purchase_stock
 from tools.weather import get_weather
 from tools.web_search import web_search
 
@@ -11,6 +12,7 @@ TOOLS = [
     get_weather,
     calculator,
     get_current_datetime,
+    purchase_stock,
     search_uploaded_documents,
     web_search,
 ]
@@ -20,6 +22,7 @@ __all__ = [
     "calculator",
     "get_current_datetime",
     "get_current_news",
+    "purchase_stock",
     "get_weather",
     "search_uploaded_documents",
     "web_search",

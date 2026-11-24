@@ -30,14 +30,20 @@ The agent can call these tools during a conversation:
 | `calculator` | Safe arithmetic and `sqrt`, `log`, `sin`, `cos`, and `tan`. | “What is 18% of 4500?” |
 | `get_current_datetime` | Current date and time for an IANA timezone. | “What time is it in Asia/Kolkata?” |
 | `web_search` | Top five web results via DuckDuckGo. | “Search the web for recent Python releases.” |
+| `purchase_stock` | Submit a whole-share market buy order to an Alpaca paper-trading account. | “Buy 2 shares of AAPL.” |
 
 `GNEWS_API_KEY` is optional; when absent, news uses Google News RSS without a
-key. Keep any credentials in `.env`, not in source control.
+key. Stock purchases require `ALPACA_API_KEY` and `ALPACA_SECRET_KEY` from an
+Alpaca paper-trading account. The tool uses Alpaca's paper endpoint only; it
+does not support live trading, selling, fractional shares, or limit orders.
+Keep credentials in `.env`, not in source control.
 
 ## Document Q&A (RAG)
 
-Upload PDF or DOCX files in the sidebar. The app automatically indexes them in
-the background, so you can keep chatting while they are processed. It extracts
+Attach PDF or DOCX files using the plus button in the chat composer (up to
+200 MB per file). When you send files with a prompt, they are indexed before
+the agent responds. Files attached without a prompt are indexed in the
+background, so you can keep chatting while they are processed. The app extracts
 and chunks the text, creates embeddings with the Ollama model named by
 `OLLAMA_EMBEDDING_MODEL` (default `nomic-embed-text`), and stores the index in
 the local `rag_index/` directory. The index persists across restarts and is
@@ -48,9 +54,12 @@ replaces its indexed content.
 
 ## Streaming
 
-Assistant responses stream into the chat as Ollama generates them. Tool calls
-still run before the assistant streams its final answer. If the ReAct fallback
-is used, it displays the answer after tool selection is complete.
+Assistant responses stream into the chat as Ollama generates them. Only stock
+purchase calls pause for approval. The review shows the ticker and quantity;
+approval submits the paper order, while rejection prevents that order from
+being submitted. Other tools continue without an approval prompt. This
+purchase-only approval step works with native tool calling and the ReAct
+fallback.
 
 ## Tests
 
